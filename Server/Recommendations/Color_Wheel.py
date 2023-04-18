@@ -1,4 +1,4 @@
-class ColorWheel:
+class Color_Wheel:
     def __init__(self, wheel):
         self.wheel = wheel
 
