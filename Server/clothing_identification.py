@@ -163,61 +163,64 @@ def getClothingItems(img_path):
     
     return out_df
 
-def captureAnalyzeClothing(cam):
+def captureAnalyzeClothing(img_path):
     ####### Test this on mac - WSL doesn't have write drivers or something #########
-    img_path = ""
-    if (len(sys.argv) <= 1):
-        TIMER = 3
+    # img_path = ""
+    # if (len(sys.argv) <= 1):
+    #     TIMER = 3
 
-        cv2.namedWindow("Camera")
-        cv2.setWindowProperty("Camera", cv2.WND_PROP_TOPMOST, 1)
-        cv2.setWindowProperty("Camera", cv2.WND_PROP_FULLSCREEN, 1)
+    #     cv2.namedWindow("Camera")
+    #     cv2.setWindowProperty("Camera", cv2.WND_PROP_TOPMOST, 1)
+    #     cv2.setWindowProperty("Camera", cv2.WND_PROP_FULLSCREEN, 1)
 
-        # Display the current frame
-        ret, frame = cam.read()
-        cv2.imshow("Camera", frame)
+    #     # Display the current frame
+    #     ret, frame = cam.read()
+    #     cv2.imshow("Camera", frame)
 
-        prev = time.time()
+    #     prev = time.time()
         
-        while TIMER >= 0:
-            ret, frame = cam.read()
+    #     while TIMER >= 0:
+    #         ret, frame = cam.read()
 
-            # Display the countdown on the frame
-            font = cv2.FONT_HERSHEY_SIMPLEX
-            cv2.putText(frame, str(TIMER), (200, 250), font, 7, 
-                (0, 255, 255), 4, cv2.LINE_AA)
-            cv2.imshow('Camera', frame)
-            cv2.waitKey(125)
+    #         # Display the countdown on the frame
+    #         font = cv2.FONT_HERSHEY_SIMPLEX
+    #         cv2.putText(frame, str(TIMER), (200, 250), font, 7, 
+    #             (0, 255, 255), 4, cv2.LINE_AA)
+    #         cv2.imshow('Camera', frame)
+    #         cv2.waitKey(125)
 
-            # get current time
-            curr = time.time()
+    #         # get current time
+    #         curr = time.time()
 
-            if curr-prev >= 1:
-                prev = curr
-                TIMER = TIMER - 1
+    #         if curr-prev >= 1:
+    #             prev = curr
+    #             TIMER = TIMER - 1
             
         
-        ret, img = cam.read()
-        cv2.imshow('Camera', img)
+    #     ret, img = cam.read()
+    #     cv2.imshow('Camera', img)
 
-        cv2.waitKey(2000)
+    #     cv2.waitKey(2000)
 
-        img_path = "./Data/Source_Images/Test_Image_Detection_Results/opencv_frame.jpg"
-        cv2.imwrite(img_path, img)
-        print("{} written!".format(img_path))
+    #     img_path = "./Data/Source_Images/Test_Image_Detection_Results/opencv_frame.jpg"
+    #     cv2.imwrite(img_path, img)
+    #     print("{} written!".format(img_path))
             
 
-        #cam.release()
+    #     #cam.release()
 
-        cv2.destroyAllWindows()
+    #     cv2.destroyAllWindows()
         
-    else:
-        img_path = sys.argv[1]
+    # else:
+    #     img_path = sys.argv[1]
 
     #--------- Clothing Item Detection -------------
     
     clothingItemsDF = getClothingItems(img_path)
-    out_path = "./Data/Source_Images/Test_Image_Detection_Results/opencv_frame_colors.jpg"
+    out_path = "./static/opencv_frame_colors.jpg"
+    returnObj = {}
+
+    returnObj["out_path"] = out_path
 
     colorList = []
     colorSet = set()
@@ -229,6 +232,8 @@ def captureAnalyzeClothing(cam):
     # Build the outfit object
 
     fit = Outfit()
+
+    returnObj["text"] = ""
 
     for index, row in clothingItemsDF.iterrows():
         xmin = row["xmin"]
@@ -242,20 +247,21 @@ def captureAnalyzeClothing(cam):
         itemColorsSet = ColorDetectionPipe(xmin, xmax, ymin, ymax, img_path, out_path, label)
 
         print(label, "determined to be", itemColorsSet)
+
+        returnObj["text"] += label + " is "
+
+        for color in itemColorsSet:
+            returnObj["text"] += color + ", "
+        returnObj["text"] += "."
         
         item = Clothing_Item(label)
         item.addAllColors(itemColorsSet)
-        fit.addClothingItem(item)  
+        fit.addClothingItem(item)
     
     
     ##### Add images to response #####  
-    print("Color list is:", fit.getColors())
-    print("Had Neutral?", fit.getHadNeutral())
-    returnObj = fit.getRecommendations()
 
-    colors_path = "./Data/Source_Images/Test_Image_Detection_Results/opencv_frame_colors.jpg"
-
-    returnObj["color_img"] = get_image_str(colors_path)
+    # colors_path = "./Data/Source_Images/Test_Image_Detection_Results/opencv_frame_colors.jpg"
 
     return returnObj
 

@@ -13,6 +13,9 @@
 			<input id="submit-button" class="button" type="submit"/>
 		</form>
 	</div>
+    <div class="image-display">
+        <img id="out-img" class="image" src="{{ image_path }}" alt="{{ alt_text }}">
+    </div>
 </body>
 </html>
 
@@ -27,7 +30,12 @@ document.getElementById("submit-button").addEventListener("mouseenter", function
 	responsiveVoice.speak("Submit");
 });
 
+let text = document.getElementById("out-img").alt;
+responsiveVoice.speak(text);
 
+document.getElementById("out-img").addEventListener("mouseenter", function() {
+    responsiveVoice.speak(text);
+})
 </script>
 
 <style>
@@ -67,4 +75,19 @@ body {
     color: white;
 }
 
+.image {
+    max-width: 500px;
+    max-height: 500px;
+}
+
+.image-display {
+    margin-top: 50px;
+    text-align: center;
+    padding: 20px;
+    background-color: #000000;
+    border-radius: 15px;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+}
 </style>
